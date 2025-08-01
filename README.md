@@ -39,8 +39,8 @@ Run the combined function file in MATLAB:
 vivek_RGBtoGray_RGBPlanes_RGBtoBW('color1.png', choice);
 Examples:
 vivek_RGBtoGray_RGBPlanes_RGBtoBW('color1.png', 1); % gives you Grayscale Image
-vivek_RGBtoGray_RGBPlanes_RGBtoBW('color1.png', 2); % RGB Planes
-vivek_RGBtoGray_RGBPlanes_RGBtoBW('color1.png', 3); % gives you Black and White Image
+vivek_RGBtoGray_RGBPlanes_RGBtoBW('color1.png', 2/3/4); % RGB Planes (2 for RED Plane , 3 for GREEN Plane , 4 for BLUE PLane)
+vivek_RGBtoGray_RGBPlanes_RGBtoBW('color1.png', 5); % gives you Black and White Image
 
 
 
