@@ -18,20 +18,6 @@ Throughout the lab sessions, we will explore **multiple experiments**, each targ
 
 ---
 
-## 📁 Repository Structure
-DigitalImageProcessing_Lab/
-│
-├── Experiment_1/
-│ ├── vivek_RGBtoGray_RGBPlanes_RGBtoBW.m
-│ ├── color1.png
-│ └── README.md
-│
-├── Experiment_2/
-│ └── ...
-│
-├── ...
-│
-└── README.md
----
+
 ## MATLAB Onramp Certification
 ![Original Image](https://github.com/VrdyEngineered/Matlab_Onramp/blob/main/Matlab_Onramp_Certification.jpg?raw=true)
