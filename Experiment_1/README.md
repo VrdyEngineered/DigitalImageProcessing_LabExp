@@ -1,5 +1,5 @@
 # 🎯 Digital Image Processing Laboratory
-**Author:** Chilla Vivek Reddy
+**Author:** Chilla Vivek Reddy<br>
 **Roll No.:** BT23ECI037
 
 This repository contains lab experiments and assignments for the **Digital Image Processing (DIP)** course, completed as part of the academic curriculum.
