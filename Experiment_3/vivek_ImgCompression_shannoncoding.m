@@ -39,13 +39,28 @@ compression_ratio = original_bits / compressed_bits; % Compression ratio
 
 original_size_kb = original_bits / 8 / 1024; % KB before compression
 compressed_size_kb = compressed_bits / 8 / 1024; % KB after compression
+% --- STEP 8: Calculate Entropy, Avg Length, Efficiency, Redundancy ---
+% Entropy H = -Σ p * log2(p)
+entropy_val = -sum(prob .* log2(prob));
+
+% Avg length L = Σ p * code_length
+code_lengths = cellfun(@length, codes);
+L = sum(prob .* code_lengths);
+
+% Efficiency & redundancy
+efficiency = (entropy_val / L) * 100; % %
+redundancy = 100 - efficiency; % %
 
 % Print results
 fprintf('Original size: %.2f KB\n', original_size_kb);
 fprintf('Compressed size: %.2f KB\n', compressed_size_kb);
 fprintf('Compression ratio: %.2f\n', compression_ratio);
+fprintf('Entropy (H): %.4f bits/symbol\n', entropy_val);
+fprintf('Average Code Length (L): %.4f bits/symbol\n', L);
+fprintf('Efficiency: %.2f %%\n', efficiency);
+fprintf('Redundancy: %.2f %%\n', redundancy);
 
-% --- STEP 8: Show original & "compressed" images ---
+% --- STEP 9: Show original & "compressed" images ---
 figure;
 subplot(1,2,1);
 imshow(img);
@@ -53,7 +68,7 @@ title(sprintf('Original Image\n%.2f KB', original_size_kb));
 
 subplot(1,2,2);
 imshow(img); %  We show the same image, since Shannon–Fano is lossless
-title(sprintf('Compressed Image\n%.2f KB', compressed_size_kb));
+title(sprintf('Compressed Image\n%.2f KB | L=%.2f', compressed_size_kb,L));
 end
 % =========================
 % Shannon–Fano Coding Function
