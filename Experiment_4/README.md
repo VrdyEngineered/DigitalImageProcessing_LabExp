@@ -87,7 +87,7 @@ The implementation for each compression algorithm is provided as a function with
 | ------------------ | ------------------------------------------------------------- | --------------------------------------------------------------- |
 | **Reconstruction** | Reconstructed image is **identical** to the original.         | Reconstructed image is an **approximation** of the original.    |
 | **Quality** | Perfect (no data loss).                                       | Degrades as compression increases. Blocky artifacts may appear. |
-| **Compression Ratio**| The compression ratio is **1.25:1**.                             | The compression ratio is **2.6:1**.                               |
+| **Compression Ratio**| The compression ratio is **1.25:1**.                             | The compression ratio is **2.6:1** and size is 24.5 bytes.                               |
 | **Key Principle** | Statistical redundancy (entropy encoding).                    | Perceptual redundancy (discards what the human eye can't see).  |
 
 ---
