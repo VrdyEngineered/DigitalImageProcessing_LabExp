@@ -1,57 +1,46 @@
-function vivek_ImgCompression_shannoncoding(imgg)
 close all;
 clc
 % --- STEP 1: Read image ---
-img = imread(imgg); %Load image (can be JPG, BMP, PNG, or TIF)
+img = imread('lowcontrast.jpg'); % Load image (can be JPG, BMP, PNG, or TIF)
 
 % If it's a color image (3 channels), convert it to grayscale
 if size(img, 3)==3
-    img = uint8(mean(img,3)); % Average the RGB values to get black & white image
+    img = rgb2gray(img); % Proper grayscale conversion
 end
 
 % --- STEP 2: Prepare pixel data ---
-data = img(:); %Flatten image into a long column of pixel values (0–255)
+data = img(:)'; % Flatten image into row vector
 
 % --- STEP 3: Get symbol frequencies ---
-symbols = unique(data); % 🔍 Find all unique pixel values that actually appear
-freq = histcounts(data, symbols); % Count how many times each pixel value appears
-prob = freq / sum(freq); % Convert counts to probabilities
+symbols = unique(data);                % Unique pixel values
+counts = histc(data, symbols);         % Count occurrences of each symbol
+prob = counts / sum(counts);           % Convert counts → probabilities
 
-% --- STEP 4: Sort symbols by probability ---
-[prob, idx] = sort(prob, 'descend'); % ⬇️ Most frequent first
-symbols = symbols(idx); %  Reorder symbols accordingly
+% --- STEP 4: Map pixels to symbol indices ---
+[~, idx] = ismember(data, symbols);    % Replace pixels with symbol indices (1..length(symbols))
 
-% --- STEP 5: Generate Shannon–Fano codes ---
-codes = shannon_fano(symbols, prob); % 🧠 Assign binary codes based on probability
+% --- STEP 5: Arithmetic Encoding ---
+arithStream = arithenco(idx, counts);  % Encode using counts
 
-% --- STEP 6: Encode the image ---
-encoded_str = ''; % Start with an empty string for our compressed bits
-for i = 1:length(data)
-    encoded_str = [encoded_str codes{symbols == data(i)}]; %#ok<AGROW>
-    %  For each pixel: find its symbol, append its binary code
-end
+% --- STEP 6: Arithmetic Decoding ---
+decodedIdx = arithdeco(arithStream, counts, length(idx));
+decodedImg = reshape(symbols(decodedIdx), size(img));
 
-% --- STEP 7: Calculate compression stats ---
-original_bits = numel(data) * 8; %  Size before compression (8 bits per pixel)
-compressed_bits = length(encoded_str); % Size after compression (bits)
+% --- STEP 7: Compression stats ---
+original_bits = numel(data) * 8;       % Original size (8 bits/pixel)
+compressed_bits = numel(arithStream);  % Encoded stream length in bits
+compression_ratio = original_bits / compressed_bits;
 
-compression_ratio = original_bits / compressed_bits; % Compression ratio
+original_size_kb = original_bits / 8 / 1024;
+compressed_size_kb = compressed_bits / 8 / 1024;
 
-original_size_kb = original_bits / 8 / 1024; % KB before compression
-compressed_size_kb = compressed_bits / 8 / 1024; % KB after compression
-% --- STEP 8: Calculate Entropy, Avg Length, Efficiency, Redundancy ---
-% Entropy H = -Σ p * log2(p)
-entropy_val = -sum(prob .* log2(prob));
+% --- STEP 8: Entropy, Avg Length, Efficiency, Redundancy ---
+entropy_val = -sum(prob(prob>0) .* log2(prob(prob>0))); % Entropy
+L = compressed_bits / numel(data);                      % Avg code length
+efficiency = (entropy_val / L) * 100;
+redundancy = 100 - efficiency;
 
-% Avg length L = Σ p * code_length
-code_lengths = cellfun(@length, codes);
-L = sum(prob .* code_lengths);
-
-% Efficiency & redundancy
-efficiency = (entropy_val / L) * 100; % %
-redundancy = 100 - efficiency; % %
-
-% Print results
+% --- STEP 9: Print results ---
 fprintf('Original size: %.2f KB\n', original_size_kb);
 fprintf('Compressed size: %.2f KB\n', compressed_size_kb);
 fprintf('Compression ratio: %.2f\n', compression_ratio);
@@ -60,37 +49,12 @@ fprintf('Average Code Length (L): %.4f bits/symbol\n', L);
 fprintf('Efficiency: %.2f %%\n', efficiency);
 fprintf('Redundancy: %.2f %%\n', redundancy);
 
-% --- STEP 9: Show original & "compressed" images ---
+% --- STEP 10: Show original & reconstructed images ---
 figure;
 subplot(1,2,1);
 imshow(img);
 title(sprintf('Original Image\n%.2f KB', original_size_kb));
 
 subplot(1,2,2);
-imshow(img); %  We show the same image, since Shannon–Fano is lossless
-title(sprintf('Compressed Image\n%.2f KB | L=%.2f', compressed_size_kb,L));
-end
-% =========================
-% Shannon–Fano Coding Function
-% =========================
-function codes = shannon_fano(symbols, prob)
-    codes = cell(length(symbols),1); %Prepare empty list for codes
-    assign_codes(1:length(symbols), prob, ''); % Start recursive coding
-    
-    function assign_codes(indices, prob, prefix)
-        if length(indices) == 1
-            codes{indices} = prefix; %  Assign code if only one symbol remains
-            return;
-        end
-        
-        %  Find the split point where probability is half the total
-        total = sum(prob);
-        cum_sum = cumsum(prob);
-        [~, split_index] = min(abs(cum_sum - total/2));
-        
-        % Left group gets '0', right group gets '1'
-        assign_codes(indices(1:split_index), prob(1:split_index), [prefix '0']);
-        assign_codes(indices(split_index+1:end), prob(split_index+1:end), [prefix '1']);
-    end
-end
-
+imshow(uint8(decodedImg));
+title(sprintf('Reconstructed Image\n%.2f KB | L=%.2f', compressed_size_kb,L));
